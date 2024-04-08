@@ -1,0 +1,51 @@
+@Astate_HostAddress = http://localhost:5100
+
+
+###
+### Récupérer toutes les notes d'un utilisateur spécifique
+###
+
+GET {{Astate_HostAddress}}/Note/user/1
+
+###
+### Récupérer toutes les notes d'un utilisateur spécifique
+###
+
+GET {{Astate_HostAddress}}/Note/user/1
+
+###
+### Créer une nouvelle note
+###
+
+POST {{Astate_HostAddress}}/Note/
+Content-Type: application/json
+
+{
+    "IdOwner": 1,
+    "Title": "Nouvelle Note",
+    "Description": "Description de la nouvelle note",
+    "Content": "Contenu de la nouvelle note",
+    "Img": "image.jpg"
+}
+
+###
+### Mettre à jour une note
+###
+
+PUT {{Astate_HostAddress}}/Note/5
+Content-Type: application/json
+
+{
+    "Id": 5,
+    "IdOwner": 1,
+    "Title": "Note mise à jour",
+    "Description": "Description mise à jour",
+    "Content": "Contenu mis à jour",
+    "Img": "image.jpg"
+}
+
+###
+### Supprimer une note
+###
+
+DELETE {{Astate_HostAddress}}/Note/5
