@@ -35,7 +35,7 @@ namespace Astate.Controllers
 
         // POST: api/Note
         [HttpPost]
-        public IActionResult Post([FromBody] Note note)
+        public IActionResult Create([FromBody] Note note)
         {
             _noteService.CreateNote(note);
             return CreatedAtAction(nameof(Get), new { id = note.Id }, note);
@@ -43,7 +43,7 @@ namespace Astate.Controllers
 
         // PUT: api/Note/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Note note)
+        public IActionResult UpdateNote(int id, [FromBody] Note note)
         {
             if (id != note.Id)
             {
