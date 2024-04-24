@@ -27,7 +27,7 @@ namespace Astate.Controllers
         /// </returns>
 
         [HttpGet("{id}", Name = "GetUtilisateur")]
-        public async Task<IActionResult> GetUtilisateurByIdAsync(int id)
+        public async Task<IActionResult> GetUtilisateurById(int id)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace Astate.Controllers
             try
             {
                 await _utilisateurService.CreateUtilisateurAsync(utilisateur);
-                return CreatedAtAction(nameof(GetUtilisateurByIdAsync), new { id = utilisateur.Id }, utilisateur);
+                return CreatedAtAction(nameof(GetUtilisateurById), new { id = utilisateur.Id }, utilisateur);
             }
             catch (Exception ex)
             {
@@ -69,7 +69,31 @@ namespace Astate.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUtilisateur(int id, [FromBody] Utilisateur utilisateur)
+        {
+            try
+            {
+                if (id != utilisateur.Id)
+                {
+                    return BadRequest("L'ID de l'utilisateur dans l'URL ne correspond pas à l'ID de l'utilisateur dans le corps de la requête.");
+                }
 
+                await _utilisateurService.UpdateUtilisateurAsync(id, utilisateur.FirstName, utilisateur.LastName, utilisateur.Email, utilisateur.Password);
+                return Ok("Utilisateur mis à jour avec succès.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUtilisateur(int id)
+        {
+            await _utilisateurService.DeleteUtilisateurAsync(id);
+            return NoContent();
+        }
     }
 
 }
