@@ -5,19 +5,19 @@
 ### Récupérer toutes les notes d'un utilisateur spécifique
 ###
 
-GET {{Astate_HostAddress}}/Note/user/1
+GET @Astate_HostAddress/api/Note/user/1
 
 ###
 ### Récupérer toutes les notes d'un utilisateur spécifique
 ###
 
-GET {{Astate_HostAddress}}/Note/user/1
+GET @Astate_HostAddress/api/Note/user/1
 
 ###
 ### Créer une nouvelle note
 ###
 
-POST {{Astate_HostAddress}}/Note/
+POST @Astate_HostAddress/api/Note/
 Content-Type: application/json
 
 {
@@ -32,7 +32,7 @@ Content-Type: application/json
 ### Mettre à jour une note
 ###
 
-PUT {{Astate_HostAddress}}/Note/5
+PUT @Astate_HostAddress/api/Note/5
 Content-Type: application/json
 
 {
@@ -48,4 +48,43 @@ Content-Type: application/json
 ### Supprimer une note
 ###
 
-DELETE {{Astate_HostAddress}}/Note/5
+DELETE @Astate_HostAddress/api/Note/5
+
+
+###
+### Récupérer un utilisateur par son identifiant
+###
+
+GET @Astate_HostAddress/api/Utilisateur/1
+
+###
+### Créer un nouvel utilisateur
+###
+
+POST @Astate_HostAddress/api/Utilisateur
+Content-Type: application/json
+
+{
+    "Email": "Nom.Prénom@example.com",
+    "Password": "password123",
+}
+
+###
+### Mettre à jour un utilisateur existant
+###
+
+PUT @Astate_HostAddress/api/Utilisateur/1
+Content-Type: application/json
+
+{
+    "Id": "1", 
+    "Email": "NN.NP@example.com",
+    "Password": "newpassword123",
+    "PhoneNumber": "0987654321" 
+}
+
+###
+### Supprimer un utilisateur
+###
+
+DELETE @Astate_HostAddress/api/Utilisateur/1
