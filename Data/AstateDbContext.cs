@@ -1,18 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using Astate.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Data
 {
-    public class AstateDbContext : DbContext
+    public class AstateDbContext : IdentityDbContext<IdentityUser>
     {
-        public AstateDbContext(DbContextOptions options) : base(options) { }
+        public AstateDbContext(DbContextOptions<AstateDbContext> options) : base(options) { }
 
         public DbSet<Note> Notes { get; set; }
-
-        public DbSet<Utilisateur> Utilisateurs { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
         {
-            // Vous pouvez ajouter ici des configurations de modèle spécifiques si nécessaire
+            optionsBuilder.UseMySQL("name=DefaultConnection");
         }
+    }
     }
 }

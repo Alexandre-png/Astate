@@ -1,4 +1,6 @@
 using Astate.Models;
+using Astate.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Astate.Controllers
@@ -7,92 +9,88 @@ namespace Astate.Controllers
     [ApiController]
     public class UtilisateurController : ControllerBase
     {
-        private readonly UtilisateurService _utilisateurService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUtilisateurService _utilisateurService;
+        private readonly ILogger<UtilisateurController> _logger;
+        private readonly ITokenService _tokenService;
 
-        public UtilisateurController(UtilisateurService utilisateurService)
+        // Injection de UserManager dans le constructeur
+        public UtilisateurController(UserManager<IdentityUser> userManager, ITokenService tokenService, ILogger<UtilisateurController> logger, IUtilisateurService utilisateurService)
         {
+            _userManager = userManager;
+            _tokenService = tokenService;
+            _logger = logger;
             _utilisateurService = utilisateurService;
         }
 
-
-        /// <summary>
-        /// Récupère un utilisateur par son identifiant unique de manière asynchrone.
-        /// </summary>
-        /// <param name="id">L'identifiant de l'utilisateur à récupérer.</param>
-        /// <returns>
-        /// Un objet de type Task<IActionResult> représentant le résultat de l'opération.
-        /// Si l'utilisateur est trouvé, il renvoie un code de réponse 200 OK avec l'utilisateur dans le corps de la réponse.
-        /// Si l'utilisateur n'est pas trouvé, il renvoie un code de réponse 404 Not Found.
-        /// Si une erreur se produit lors de la récupération de l'utilisateur, il renvoie un code de réponse 500 Internal Server Error.
-        /// </returns>
-
-        [HttpGet("{id}", Name = "GetUtilisateur")]
-        public async Task<IActionResult> GetUtilisateurById(int id)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            try
+            if (model.Email == null || model.Password == null)
             {
-                var utilisateur = await _utilisateurService.GetUtilisateurByIdAsync(id);
-                return Ok(utilisateur);
+                return BadRequest("L'email ou le mot de passe ne peut pas être nul");
             }
-            catch (InvalidOperationException)
+
+            if (await _utilisateurService.EmailExistsAsync(model.Email))
             {
-                return NotFound();
+                return BadRequest("L'email est déjà utilisé");
             }
-            catch (Exception ex)
+
+            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var result = await _utilisateurService.CreateUtilisateurAsync(user, model.Password);
+
+            if (result.Succeeded)
             {
-                // Gestion des autres exceptions
-                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
+                return Ok(new { UserId = user.Id });
             }
+
+            return BadRequest(result.Errors);
         }
 
-        /// <summary>
-        /// Crée un nouvel utilisateur de manière asynchrone.
-        /// </summary>
-        /// <param name="utilisateur">L'utilisateur à créer.</param>
-        /// <returns>
-        /// Un objet de type Task<IActionResult> représentant le résultat de l'opération.
-        /// Si l'utilisateur est créé avec succès, il renvoie un code de réponse 201 Created avec l'URI de la ressource nouvellement créée.
-        /// Si une erreur se produit lors de la création de l'utilisateur, il renvoie un code de réponse 500 Internal Server Error.
-        /// </returns>
-        [HttpPost]
-        public async Task<IActionResult> CreateUtilisateur([FromBody] Utilisateur utilisateur)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginModel model)
         {
-            try
+            var user = await _utilisateurService.FindByEmailAsync(model.Email);
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                await _utilisateurService.CreateUtilisateurAsync(utilisateur);
-                return CreatedAtAction(nameof(GetUtilisateurById), new { id = utilisateur.Id }, utilisateur);
+                // Création du token
+                var token = _tokenService.CreateToken(user);
+                return Ok(new { UserId = user.Id, Token = token });
             }
-            catch (Exception ex)
-            {
-                // Gestion des exceptions
-                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}"); // Renvoie un code 500 Internal Server Error
-            }
+            return BadRequest("Invalid login attempt.");
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUtilisateur(int id, [FromBody] Utilisateur utilisateur)
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] IdentityUser updatedUser)
         {
-            try
+            var user = await _utilisateurService.FindByEmailAsync(updatedUser.Email);
+            if (user == null)
             {
-                if (id != utilisateur.Id)
-                {
-                    return BadRequest("L'ID de l'utilisateur dans l'URL ne correspond pas à l'ID de l'utilisateur dans le corps de la requête.");
-                }
+                return NotFound("User not found.");
+            }
 
-                await _utilisateurService.UpdateUtilisateurAsync(id, utilisateur.FirstName, utilisateur.LastName, utilisateur.Email, utilisateur.Password);
-                return Ok("Utilisateur mis à jour avec succès.");
-            }
-            catch (Exception ex)
+            user.Email = updatedUser.Email;
+            user.UserName = updatedUser.Email;
+
+            var result = await _utilisateurService.UpdateUtilisateurAsync(user);
+            if (result.Succeeded)
             {
-                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
+                return Ok("User updated successfully.");
             }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUtilisateur(int id)
+        public async Task<IActionResult> DeleteUser(string id)
         {
-            await _utilisateurService.DeleteUtilisateurAsync(id);
-            return NoContent();
+            var result = await _utilisateurService.DeleteUtilisateurAsync(id);
+            if (result.Succeeded)
+            {
+                return Ok("User deleted successfully.");
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 

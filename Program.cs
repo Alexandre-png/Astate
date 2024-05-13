@@ -1,6 +1,13 @@
+using System.Configuration;
+using System.Text;
 using Astate.Data;
+using Astate.Models;
 using Astate.Services;
+using Astate.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,25 +22,87 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowAnyHeader());
 });
+
+
 builder.Services.AddControllers();
+builder.Services.Configure<Token>(builder.Configuration.GetSection("TokenSettings"));
 builder.Services.AddScoped<NoteService>();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<UtilisateurService>();
+builder.Services.AddScoped<IUtilisateurService, UtilisateurService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+var key = builder.Configuration.GetSection("TokenSettings");
+builder.Services.AddAuthentication(x =>
+    {
+        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(x =>
+    {
+        x.RequireHttpsMetadata = false;
+        x.SaveToken = true;
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key.ToString())),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddControllers(
+    options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddDbContext<AstateDbContext>(options => options.UseInMemoryDatabase("items"));
+builder.Services.AddDbContext<AstateDbContext>(options =>
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password settings.
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+
+    // Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings.
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = true;
+});
+
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AstateDbContext>()
+    .AddDefaultTokenProviders();
+
+
+builder.Services.AddControllersWithViews();
+
 builder.Services.AddSwaggerGen(c =>
 {
-     c.SwaggerDoc("v1", new OpenApiInfo {
-         Title = "Note API",
-         Description = "Taking note made easy",
-         Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Note API",
+        Description = "Taking note made easy",
+        Version = "v1"
+    });
 });
+
 var app = builder.Build();
 app.UseCors("CorsPolicy");
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-   c.SwaggerEndpoint("/swagger/v1/swagger.json", "Note API V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Note API V1");
 });
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

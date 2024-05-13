@@ -15,10 +15,15 @@ namespace Astate.Controllers
             _noteService = noteService;
         }
 
+        /// <summary>
+        /// Récupère une note par son identifiant.
+        /// </summary>
+        /// <param name="id">L'identifiant de la note à récupérer.</param>
+        /// <returns>La note correspondant à l'identifiant.</returns>
         [HttpGet("{id}", Name = "GetNote")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            var note = _noteService.GetNoteById(id);
+            var note = await _noteService.GetNoteByIdAsync(id);
             if (note == null)
             {
                 return NotFound();
@@ -26,39 +31,57 @@ namespace Astate.Controllers
             return Ok(note);
         }
 
+        /// <summary>
+        /// Récupère toutes les notes d'un utilisateur.
+        /// </summary>
+        /// <param name="userId">L'identifiant de l'utilisateur.</param>
+        /// <returns>La liste des notes de l'utilisateur.</returns>
         [HttpGet("{userId}/notes")]
-        public IActionResult GetAllNotes(int userId)
+        public async Task<IActionResult> GetAllNotes(int userId)
         {
-            var notes = _noteService.GetNotesByUserId(userId);
+            var notes = await _noteService.GetNotesByUserIdAsync(userId);
             return Ok(notes);
         }
 
-        // POST: api/Note
+        /// <summary>
+        /// Crée une nouvelle note.
+        /// </summary>
+        /// <param name="note">La note à créer.</param>
+        /// <returns>La réponse HTTP indiquant le succès de la création.</returns>
         [HttpPost]
-        public IActionResult Create([FromBody] Note note)
+        public async Task<IActionResult> Create([FromBody] Note note)
         {
-            _noteService.CreateNote(note);
+            await _noteService.CreateNoteAsync(note);
             return CreatedAtAction(nameof(Get), new { id = note.Id }, note);
         }
 
-        // PUT: api/Note/5
+        /// <summary>
+        /// Met à jour une note existante.
+        /// </summary>
+        /// <param name="id">L'identifiant de la note à mettre à jour.</param>
+        /// <param name="note">La note mise à jour.</param>
+        /// <returns>La réponse HTTP indiquant le succès de la mise à jour.</returns>
         [HttpPut("{id}")]
-        public IActionResult UpdateNote(int id, [FromBody] Note note)
+        public async Task<IActionResult> UpdateNote(int id, [FromBody] Note note)
         {
             if (id != note.Id)
             {
                 return BadRequest();
             }
 
-            _noteService.UpdateNote(note.Id, note.Content, note.ImageUrl);
+            await _noteService.UpdateNoteAsync(note.Id, note.Content, note.ImageUrl);
             return NoContent();
         }
 
-        // DELETE: api/Note/5
+        /// <summary>
+        /// Supprime une note existante.
+        /// </summary>
+        /// <param name="id">L'identifiant de la note à supprimer.</param>
+        /// <returns>La réponse HTTP indiquant le succès de la suppression.</returns>
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _noteService.DeleteNote(id);
+            await _noteService.DeleteNoteAsync(id);
             return NoContent();
         }
     }
