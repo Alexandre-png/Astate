@@ -29,6 +29,7 @@ builder.Services.Configure<Token>(builder.Configuration.GetSection("TokenSetting
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<UtilisateurService>();
 builder.Services.AddScoped<IUtilisateurService, UtilisateurService>();
+builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var key = builder.Configuration.GetSection("TokenSettings");

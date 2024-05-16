@@ -25,8 +25,7 @@ namespace Astate.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, utilisateur.Id.ToString()),
-                    new Claim(ClaimTypes.Email, utilisateur.Email)
+                    new Claim(ClaimTypes.NameIdentifier, utilisateur.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

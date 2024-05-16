@@ -11,11 +11,11 @@ namespace Astate.Data
 
         public DbSet<Note> Notes { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseMySQL("name=DefaultConnection");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySQL("name=DefaultConnection");
+            }
         }
-    }
     }
 }

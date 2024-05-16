@@ -55,7 +55,7 @@ namespace Astate.Controllers
             {
                 // Création du token
                 var token = _tokenService.CreateToken(user);
-                return Ok(new { UserId = user.Id, Token = token });
+                return Ok(new { Token = token });
             }
             return BadRequest("Invalid login attempt.");
         }
