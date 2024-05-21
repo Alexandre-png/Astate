@@ -46,7 +46,7 @@ namespace Astate.Controllers
             {
                 IdOwner = noteDto.IdOwner,
                 IdLivre = noteDto.IdLivre,
-                Titre = noteDto.Titre,
+                Title = noteDto.Title,
                 Content = noteDto.Content,
                 ImageUrl = noteDto.ImageUrl
             };
