@@ -42,9 +42,10 @@ namespace Astate.Services
                 throw new InvalidOperationException("La note demandée n'a pas été trouvée.");
             }
 
+            existingNote.Titre = noteToUpdate.Titre ?? existingNote.Titre;
             existingNote.Content = noteToUpdate.Content ?? existingNote.Content;
             existingNote.ImageUrl = noteToUpdate.ImageUrl ?? existingNote.ImageUrl;
-            existingNote.IdLivre = noteToUpdate.IdLivre; 
+            existingNote.IdLivre = noteToUpdate.IdLivre;
 
             _context.Notes.Update(existingNote);
             await _context.SaveChangesAsync();

@@ -44,9 +44,9 @@ namespace Astate.Controllers
 
             var note = new Note
             {
-                Id = Guid.NewGuid().ToString(),
                 IdOwner = noteDto.IdOwner,
                 IdLivre = noteDto.IdLivre,
+                Titre = noteDto.Titre,
                 Content = noteDto.Content,
                 ImageUrl = noteDto.ImageUrl
             };

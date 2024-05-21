@@ -15,6 +15,9 @@ public class Note
     [Required(ErrorMessage = "L'ID du livre est requis.")]
     public string IdLivre { get; set; }
 
+    [Required(ErrorMessage = "Le titre du livre est requis.")]
+    public string Titre { get; set; }
+
     [Required(ErrorMessage = "Le contenu de la note est requis.")]
     public string Content { get; set; }
 
@@ -28,6 +31,10 @@ public class NoteDto
 
     [Required(ErrorMessage = "L'ID du livre est requis.")]
     public string IdLivre { get; set; }
+
+    [Required(ErrorMessage = "Le titre du livre est requis.")]
+    public string Titre { get; set; }
+
 
     [Required(ErrorMessage = "Le contenu de la note est requis.")]
     public string Content { get; set; }
