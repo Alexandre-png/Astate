@@ -45,7 +45,7 @@ namespace Astate.Services
             existingNote.Title = noteToUpdate.Title ?? existingNote.Title;
             existingNote.Content = noteToUpdate.Content ?? existingNote.Content;
             existingNote.ImageUrl = noteToUpdate.ImageUrl ?? existingNote.ImageUrl;
-            existingNote.IdLivre = noteToUpdate.IdLivre;
+            existingNote.IdLivre = noteToUpdate.IdLivre ?? existingNote.IdLivre;
 
             _context.Notes.Update(existingNote);
             await _context.SaveChangesAsync();

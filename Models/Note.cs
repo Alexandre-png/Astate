@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Models;
 
@@ -11,6 +12,9 @@ public class Note
 
     [Required(ErrorMessage = "L'ID du propriétaire est requis.")]
     public string IdOwner { get; set; }
+
+    [ForeignKey("IdOwner")]
+    public IdentityUser Owner { get; set; }
 
     [Required(ErrorMessage = "L'ID du livre est requis.")]
     public string IdLivre { get; set; }

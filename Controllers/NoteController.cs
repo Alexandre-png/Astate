@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Astate.Services;
 using Astate.Models;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Controllers
 {
@@ -10,10 +10,12 @@ namespace Astate.Controllers
     public class NoteController : ControllerBase
     {
         private readonly INoteService _noteService;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public NoteController(INoteService noteService)
+        public NoteController(INoteService noteService, UserManager<IdentityUser> userManager)
         {
             _noteService = noteService;
+            _userManager = userManager;
         }
 
         [HttpGet("{id}", Name = "GetNote")]
@@ -42,9 +44,11 @@ namespace Astate.Controllers
                 return BadRequest(ModelState);
             }
 
+            var user = await _userManager.FindByIdAsync(noteDto.IdOwner);
+
             var note = new Note
             {
-                IdOwner = noteDto.IdOwner,
+                Owner = user,
                 IdLivre = noteDto.IdLivre,
                 Title = noteDto.Title,
                 Content = noteDto.Content,

@@ -14,7 +14,7 @@ namespace Astate.Controllers
         private readonly ILogger<UtilisateurController> _logger;
         private readonly ITokenService _tokenService;
 
-        // Injection de UserManager dans le constructeur
+        
         public UtilisateurController(UserManager<IdentityUser> userManager, ITokenService tokenService, ILogger<UtilisateurController> logger, IUtilisateurService utilisateurService)
         {
             _userManager = userManager;
