@@ -7,6 +7,7 @@ using Astate.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -27,9 +28,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.Configure<Token>(builder.Configuration.GetSection("TokenSettings"));
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<ImageService>();
 builder.Services.AddScoped<UtilisateurService>();
 builder.Services.AddScoped<IUtilisateurService, UtilisateurService>();
 builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var key = builder.Configuration.GetSection("TokenSettings");
@@ -96,7 +99,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+var env = app.Environment;
 app.UseCors("CorsPolicy");
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -105,7 +110,14 @@ app.UseSwaggerUI(c =>
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
+app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(env.WebRootPath, "uploads")),
+    RequestPath = "/uploads"
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -113,8 +125,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 
