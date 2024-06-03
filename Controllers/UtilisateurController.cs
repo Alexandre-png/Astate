@@ -14,7 +14,7 @@ namespace Astate.Controllers
         private readonly ILogger<UtilisateurController> _logger;
         private readonly ITokenService _tokenService;
 
-        // Injection de UserManager dans le constructeur
+        
         public UtilisateurController(UserManager<IdentityUser> userManager, ITokenService tokenService, ILogger<UtilisateurController> logger, IUtilisateurService utilisateurService)
         {
             _userManager = userManager;
@@ -55,7 +55,7 @@ namespace Astate.Controllers
             {
                 // Création du token
                 var token = _tokenService.CreateToken(user);
-                return Ok(new { UserId = user.Id, Token = token });
+                return Ok(new { Token = token });
             }
             return BadRequest("Invalid login attempt.");
         }

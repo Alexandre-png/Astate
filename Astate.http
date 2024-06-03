@@ -88,3 +88,19 @@ Content-Type: application/json
 ###
 
 DELETE @Astate_HostAddress/api/Utilisateur/1
+
+###
+### Uploader une image
+###
+
+Post @Astate_HostAddress/api/Image
+Content-Type: application/json
+
+{
+    "Id": "1", 
+    "FileName": "ImageLivre",
+    "FilePath": "path",
+    "ContentType": "img" 
+    "UploadedById: "8974651654312654" 
+    "UploadedAt": "12/05/2024" 
+}

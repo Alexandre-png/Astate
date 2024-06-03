@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Astate.Services;
 using Astate.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Controllers
 {
@@ -8,20 +9,17 @@ namespace Astate.Controllers
     [ApiController]
     public class NoteController : ControllerBase
     {
-        private readonly NoteService _noteService;
+        private readonly INoteService _noteService;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public NoteController(NoteService noteService)
+        public NoteController(INoteService noteService, UserManager<IdentityUser> userManager)
         {
             _noteService = noteService;
+            _userManager = userManager;
         }
 
-        /// <summary>
-        /// Récupère une note par son identifiant.
-        /// </summary>
-        /// <param name="id">L'identifiant de la note à récupérer.</param>
-        /// <returns>La note correspondant à l'identifiant.</returns>
         [HttpGet("{id}", Name = "GetNote")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(string id)
         {
             var note = await _noteService.GetNoteByIdAsync(id);
             if (note == null)
@@ -31,58 +29,66 @@ namespace Astate.Controllers
             return Ok(note);
         }
 
-        /// <summary>
-        /// Récupère toutes les notes d'un utilisateur.
-        /// </summary>
-        /// <param name="userId">L'identifiant de l'utilisateur.</param>
-        /// <returns>La liste des notes de l'utilisateur.</returns>
         [HttpGet("{userId}/notes")]
-        public async Task<IActionResult> GetAllNotes(int userId)
+        public async Task<IActionResult> GetAllNotes(string userId)
         {
             var notes = await _noteService.GetNotesByUserIdAsync(userId);
             return Ok(notes);
         }
 
-        /// <summary>
-        /// Crée une nouvelle note.
-        /// </summary>
-        /// <param name="note">La note à créer.</param>
-        /// <returns>La réponse HTTP indiquant le succès de la création.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Note note)
+        public async Task<IActionResult> Create([FromBody] NoteDto noteDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByIdAsync(noteDto.IdOwner);
+
+            var note = new Note
+            {
+                Owner = user,
+                Title = noteDto.Title,
+                Content = noteDto.Content,
+                ImageUrl = noteDto.ImageUrl
+            };
+
             await _noteService.CreateNoteAsync(note);
             return CreatedAtAction(nameof(Get), new { id = note.Id }, note);
         }
 
-        /// <summary>
-        /// Met à jour une note existante.
-        /// </summary>
-        /// <param name="id">L'identifiant de la note à mettre à jour.</param>
-        /// <param name="note">La note mise à jour.</param>
-        /// <returns>La réponse HTTP indiquant le succès de la mise à jour.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateNote(int id, [FromBody] Note note)
+        public async Task<IActionResult> Update(string id, [FromBody] Note noteUpdate)
         {
-            if (id != note.Id)
+            if (id != noteUpdate.Id)
             {
-                return BadRequest();
+                return BadRequest("Mauvais ID");
             }
 
-            await _noteService.UpdateNoteAsync(note.Id, note.Content, note.ImageUrl);
-            return NoContent();
+            try
+            {
+                await _noteService.UpdateNoteAsync(noteUpdate);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        /// <summary>
-        /// Supprime une note existante.
-        /// </summary>
-        /// <param name="id">L'identifiant de la note à supprimer.</param>
-        /// <returns>La réponse HTTP indiquant le succès de la suppression.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
-            await _noteService.DeleteNoteAsync(id);
-            return NoContent();
+            try
+            {
+                await _noteService.DeleteNoteAsync(id);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

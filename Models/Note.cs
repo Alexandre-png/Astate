@@ -1,25 +1,42 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Models;
 
 public class Note
-    {
+{
     [Key]
-    public int Id { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public string Id { get; set; }
 
     [Required(ErrorMessage = "L'ID du propriétaire est requis.")]
-    public int IdOwner { get; set; }
+    public string IdOwner { get; set; }
 
-    [Required(ErrorMessage = "L'ID du livre est requis.")]
-    public int IdLivre { get; set; }
+    [ForeignKey("IdOwner")]
+    public IdentityUser Owner { get; set; }
 
-    [Required(ErrorMessage = "L'ID du tag est requis.")]
-    public int IdTag { get; set; }
+    [Required(ErrorMessage = "Le titre du livre est requis.")]
+    public string Title { get; set; }
 
     [Required(ErrorMessage = "Le contenu de la note est requis.")]
     public string Content { get; set; }
 
-    [Required(ErrorMessage = "L'URL de l'image est requise.")]
-    [Url(ErrorMessage = "L'URL de l'image doit être une URL valide.")]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
+
+    public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+}
+
+public class NoteDto
+{
+    public string IdOwner { get; set; }
+
+    [Required(ErrorMessage = "Le titre du livre est requis.")]
+    public string Title { get; set; }
+
+
+    [Required(ErrorMessage = "Le contenu de la note est requis.")]
+    public string Content { get; set; }
+
+    public string? ImageUrl { get; set; }
 }
