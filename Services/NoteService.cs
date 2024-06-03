@@ -21,7 +21,7 @@ namespace Astate.Services
 
         public async Task<List<Note>> GetNotesByUserIdAsync(string userId)
         {
-            return await _context.Notes.Where(n => n.IdOwner == userId).ToListAsync();
+            return await _context.Notes.Where(n => n.IdOwner == userId).OrderBy(n => n.DateCreated).ToListAsync();
         }
 
         public async Task<Note> GetNoteByIdAsync(string id)
@@ -45,8 +45,6 @@ namespace Astate.Services
             existingNote.Title = noteToUpdate.Title ?? existingNote.Title;
             existingNote.Content = noteToUpdate.Content ?? existingNote.Content;
             existingNote.ImageUrl = noteToUpdate.ImageUrl ?? existingNote.ImageUrl;
-            existingNote.IdLivre = noteToUpdate.IdLivre ?? existingNote.IdLivre;
-
             _context.Notes.Update(existingNote);
             await _context.SaveChangesAsync();
         }

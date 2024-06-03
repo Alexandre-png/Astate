@@ -35,6 +35,14 @@ namespace Astate.Data
                 .WithMany()
                 .HasForeignKey(i => i.UploadedById)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Note>(entity =>
+            {
+                entity.Property(e => e.DateCreated)
+                      .HasColumnType("datetime")
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .ValueGeneratedOnAdd();
+            });
         }
     }
 }

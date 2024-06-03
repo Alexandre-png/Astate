@@ -49,7 +49,6 @@ namespace Astate.Controllers
             var note = new Note
             {
                 Owner = user,
-                IdLivre = noteDto.IdLivre,
                 Title = noteDto.Title,
                 Content = noteDto.Content,
                 ImageUrl = noteDto.ImageUrl

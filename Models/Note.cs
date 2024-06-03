@@ -16,26 +16,21 @@ public class Note
     [ForeignKey("IdOwner")]
     public IdentityUser Owner { get; set; }
 
-    [Required(ErrorMessage = "L'ID du livre est requis.")]
-    public string IdLivre { get; set; }
-
     [Required(ErrorMessage = "Le titre du livre est requis.")]
     public string Title { get; set; }
 
     [Required(ErrorMessage = "Le contenu de la note est requis.")]
     public string Content { get; set; }
 
-    [Required(ErrorMessage = "L'URL de l'image est requise.")]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
+
+    public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 }
 
 public class NoteDto
 {
     public string IdOwner { get; set; }
 
-    [Required(ErrorMessage = "L'ID du livre est requis.")]
-    public string IdLivre { get; set; }
-
     [Required(ErrorMessage = "Le titre du livre est requis.")]
     public string Title { get; set; }
 
@@ -43,6 +38,5 @@ public class NoteDto
     [Required(ErrorMessage = "Le contenu de la note est requis.")]
     public string Content { get; set; }
 
-    [Required(ErrorMessage = "L'URL de l'image est requise.")]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 }
