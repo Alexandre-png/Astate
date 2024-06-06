@@ -1,26 +1,53 @@
+using System.Security.Claims;
 using Astate.Models;
 using Astate.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Astate.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UtilisateurController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUtilisateurService _utilisateurService;
         private readonly ILogger<UtilisateurController> _logger;
         private readonly ITokenService _tokenService;
 
-        
-        public UtilisateurController(UserManager<IdentityUser> userManager, ITokenService tokenService, ILogger<UtilisateurController> logger, IUtilisateurService utilisateurService)
+        public UtilisateurController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<UtilisateurController> logger, IUtilisateurService utilisateurService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _logger = logger;
             _utilisateurService = utilisateurService;
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var profile = new
+            {
+                Email = user.Email,
+                Id = user.Id,
+                ProfileImageUrl = user.ProfileImageUrl
+            };
+
+            return Ok(profile);
         }
 
         [HttpPost("register")]
@@ -36,7 +63,7 @@ namespace Astate.Controllers
                 return BadRequest("L'email est déjà utilisé");
             }
 
-            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
             var result = await _utilisateurService.CreateUtilisateurAsync(user, model.Password);
 
             if (result.Succeeded)
@@ -48,31 +75,30 @@ namespace Astate.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _utilisateurService.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                // Création du token
                 var token = _tokenService.CreateToken(user);
                 return Ok(new { Token = token });
             }
             return BadRequest("Invalid login attempt.");
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody] IdentityUser updatedUser)
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateUser([FromForm] UserDto userDto)
         {
-            var user = await _utilisateurService.FindByEmailAsync(updatedUser.Email);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            user.Email = updatedUser.Email;
-            user.UserName = updatedUser.Email;
-
-            var result = await _utilisateurService.UpdateUtilisateurAsync(user);
+            var result = await _utilisateurService.UpdateUtilisateurAsync(user, userDto);
             if (result.Succeeded)
             {
                 return Ok("User updated successfully.");
@@ -93,5 +119,4 @@ namespace Astate.Controllers
             return BadRequest(result.Errors);
         }
     }
-
 }

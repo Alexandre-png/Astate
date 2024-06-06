@@ -5,6 +5,6 @@ namespace Astate.Services.Interfaces
 {
     public interface ITokenService
     {
-        string CreateToken(IdentityUser utilisateur);
+        string CreateToken(ApplicationUser utilisateur);
     }
 }

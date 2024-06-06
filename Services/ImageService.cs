@@ -55,5 +55,24 @@ namespace Astate.Services
 
             return fileName;
         }
+
+        public async Task<string> SaveProfileImageAsync(IFormFile imageFile)
+        {
+            var uploadsPath = Path.Combine(_environment.WebRootPath, "profile_images");
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return fileName;
+        }
     }
 }

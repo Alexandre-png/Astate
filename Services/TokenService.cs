@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Astate.Models;
 using Astate.Services.Interfaces;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Services
 {
@@ -14,13 +13,19 @@ namespace Astate.Services
         private readonly string _key;
 
         public TokenService(IOptions<Token> options)
-    {
-        _key = options.Value.SecretKey;
-    }
-        public string CreateToken(IdentityUser utilisateur)
         {
+            _key = options.Value.SecretKey;
+        }
+        public string CreateToken(ApplicationUser utilisateur)
+        {
+
+            if (utilisateur == null) throw new ArgumentNullException(nameof(utilisateur));
+            if (string.IsNullOrEmpty(utilisateur.Id)) throw new ArgumentNullException(nameof(utilisateur.Id));
+
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_key);
+            
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]

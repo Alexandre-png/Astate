@@ -23,7 +23,6 @@ namespace Astate.Services
         {
             return await _context.Notes.Where(n => n.IdOwner == userId).OrderBy(n => n.DateCreated).ToListAsync();
         }
-
         public async Task<Note> GetNoteByIdAsync(string id)
         {
             var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == id);

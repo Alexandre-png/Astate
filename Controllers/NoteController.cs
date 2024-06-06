@@ -10,9 +10,9 @@ namespace Astate.Controllers
     public class NoteController : ControllerBase
     {
         private readonly INoteService _noteService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public NoteController(INoteService noteService, UserManager<IdentityUser> userManager)
+        public NoteController(INoteService noteService, UserManager<ApplicationUser> userManager)
         {
             _noteService = noteService;
             _userManager = userManager;

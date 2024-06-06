@@ -1,13 +1,15 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Astate.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace Astate.Data
 {
-    public class AstateDbContext : IdentityDbContext<IdentityUser>
+    public class AstateDbContext : IdentityDbContext<ApplicationUser>
     {
-        public AstateDbContext(DbContextOptions<AstateDbContext> options) : base(options) { }
+        public AstateDbContext(DbContextOptions<AstateDbContext> options)
+            : base(options)
+        {
+        }
 
         public DbSet<Note> Notes { get; set; }
         public DbSet<Image> Images { get; set; }
@@ -30,19 +32,20 @@ namespace Astate.Data
                 .HasForeignKey(n => n.IdOwner)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Note>(entity =>
+            {
+                entity.Property(e => e.DateCreated)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                    .ValueGeneratedOnAdd();
+            });
+
             modelBuilder.Entity<Image>()
                 .HasOne(i => i.UploadedBy)
                 .WithMany()
                 .HasForeignKey(i => i.UploadedById)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Note>(entity =>
-            {
-                entity.Property(e => e.DateCreated)
-                      .HasColumnType("datetime")
-                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                      .ValueGeneratedOnAdd();
-            });
         }
     }
 }
