@@ -5,7 +5,7 @@ Scribeo est une application de prise de notes inspirée de Pinterest. Ce dépôt
 
 ## Fonctionnalités
 - API RESTful pour la gestion des utilisateurs et des notes
-- Authentification et autorisation des utilisateurs
+- Authentification et autorisation par token des utilisateurs
 - Connexion à une base de données pour persister les données des utilisateurs et des notes
 
 ## Dépendances
@@ -35,6 +35,7 @@ Pour voir toutes les dépendances, consultez le fichier `*.csproj`.
    dotnet ef database update
 
 ## Configuration
+
 ### Chaîne de Connexion
 Assurez-vous de mettre à jour la chaîne de connexion à la base de données MySql dans le fichier appsettings.json :
 
@@ -59,6 +60,7 @@ Assurez-vous de mettre à jour la chaîne de connexion à la base de données My
   
 }
 ```
+
 ## Structure du projet 
 ```
 backend/
